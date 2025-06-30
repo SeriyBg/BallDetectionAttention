@@ -1,8 +1,16 @@
+import argparse
+
 from misc.config import Params
 from models.ssd_voc import ssd_ball_detector
 
 if __name__ == '__main__':
-    params = Params("config.txt")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', help='Path to the configuration file', type=str, default='config.txt')
+    args = parser.parse_args()
+
+    print('Config path: {}'.format(args.config))
+
+    params = Params(args.config)
     ssd_ball_detector(params)
 
 
