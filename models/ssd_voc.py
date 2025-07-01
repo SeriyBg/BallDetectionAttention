@@ -1,11 +1,14 @@
 import os
 import time
+from math import isnan
+from typing import Optional
 
 import cv2
 import torch
 from networkx.algorithms.shortest_paths.unweighted import predecessor
 from torch.utils.data import DataLoader
 from torchvision.models.detection import ssd300_vgg16
+from torchvision.models.detection.ssd import SSDClassificationHead, SSDRegressionHead
 from torchvision.transforms import Compose, Resize, ToTensor
 from tqdm import tqdm
 
@@ -33,17 +36,19 @@ def ssd_ball_detector(params: Params):
         mode="valid",
         num_workers=params.num_workers,
     )
-    dataloaders = {'train': DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=lambda x: tuple(zip(*x))),
+    dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True, collate_fn=lambda x: tuple(zip(*x))),
                    'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
 
     # Create SSD model with 2 classes (background + ball)
-    model = ssd300_vgg16(weights="DEFAULT")
+    num_classes = 2  # background + ball
+    model = ssd300_vgg16(num_classes=2)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = "mps"
     model.to(device)
 
     # Optimizer
-    optimizer = torch.optim.SGD(model.parameters(), lr=params.lr, momentum=0.9, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=params.lr) #momentum=0.9, weight_decay=5e-4)
 
     # Training loop
     num_epochs = params.epochs
@@ -57,7 +62,6 @@ def ssd_ball_detector(params: Params):
             #     model.train()
             # else:
             #     model.eval()
-            model.train()
             for images, targets in dataloader:
                 images = [img.to(device) for img in images]
                 targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -86,6 +90,7 @@ def ssd_ball_detector(params: Params):
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
     torch.save(model.state_dict(), model_filepath)
+
 
 if __name__ == '__main__':
     ssd_ball_detector(Params("../config.txt"))
