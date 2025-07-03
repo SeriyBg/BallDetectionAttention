@@ -1,22 +1,14 @@
 import os
 import time
-from math import isnan
-from typing import Optional
 
-import cv2
 import torch
-from networkx.algorithms.shortest_paths.unweighted import predecessor
 from torch.utils.data import DataLoader
 from torchvision.models.detection import ssd300_vgg16
-from torchvision.models.detection.ssd import SSDClassificationHead, SSDRegressionHead
-from torchvision.transforms import Compose, Resize, ToTensor
+from torchvision.transforms import Compose, ToTensor
 from tqdm import tqdm
 
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
-from data.detect_utils import predict, draw_boxes
 from misc.config import Params
-
-from PIL import Image
 
 MODEL_FOLDER = 'saved_models'
 
@@ -30,7 +22,8 @@ def ssd_ball_detector():
 
 def train_ssd(params: Params):
     # Prepare dataset
-    transform = Compose([Resize((300, 300)), ToTensor()])
+    # transform = Compose([Resize((300, 300)), ToTensor()])
+    transform = Compose([ToTensor()])
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
         transform=transform,
@@ -95,7 +88,7 @@ def train_ssd(params: Params):
 
                     total_loss += loss.item()
 
-            print(f"{phase} [SSD] - Loss: {total_loss:.4f}")
+            print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
         scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
