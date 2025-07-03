@@ -52,6 +52,7 @@ def train_ssd(params: Params):
     model = ssd_ball_detector()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     # if torch.mps.device_count() > 0:
     #     device = "mps"
     model.to(device)
