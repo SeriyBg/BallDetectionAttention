@@ -4,6 +4,7 @@ import time
 import torch
 from torch.utils.data import DataLoader
 from torchvision.models.detection import ssd300_vgg16
+from torchvision.models.detection.transform import GeneralizedRCNNTransform
 from torchvision.transforms import Compose, ToTensor
 from tqdm import tqdm
 
@@ -17,6 +18,8 @@ def ssd_ball_detector():
     # Create SSD model with 2 classes (background + ball)
     num_classes = 2  # background + ball
     model = ssd300_vgg16(num_classes=2)
+    model.transform.min_size = (1920, 1080)
+    model.transform.max_size = (1920, 1080)
     return model
 
 
@@ -46,8 +49,8 @@ def train_ssd(params: Params):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    # if torch.mps.device_count() > 0:
-    #     device = "mps"
+    if torch.mps.device_count() > 0:
+        device = "mps"
     model.to(device)
     # Training loop
     model.train()
