@@ -49,8 +49,8 @@ def train_ssd(params: Params):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    if torch.mps.device_count() > 0:
-        device = "mps"
+    # if torch.mps.device_count() > 0:
+    #     device = "mps"
     model.to(device)
     # Training loop
     model.train()
