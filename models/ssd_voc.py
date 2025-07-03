@@ -59,6 +59,9 @@ def train_ssd(params: Params):
     model.train()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=params.lr)  # momentum=0.9, weight_decay=5e-4)
+    scheduler_milestones = [int(params.epochs * 0.25), int(params.epochs * 0.50), int(params.epochs * 0.75)]
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, scheduler_milestones, gamma=0.1)
+
     num_epochs = params.epochs
     for epoch in tqdm(range(num_epochs)):
         total_loss = 0.0
@@ -92,6 +95,7 @@ def train_ssd(params: Params):
                     total_loss += loss.item()
 
             print(f"{phase} [SSD] - Loss: {total_loss:.4f}")
+        scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
