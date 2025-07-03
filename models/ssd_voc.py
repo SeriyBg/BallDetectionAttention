@@ -21,7 +21,14 @@ from PIL import Image
 MODEL_FOLDER = 'saved_models'
 
 
-def ssd_ball_detector(params: Params):
+def ssd_ball_detector():
+    # Create SSD model with 2 classes (background + ball)
+    num_classes = 2  # background + ball
+    model = ssd300_vgg16(num_classes=2)
+    return model
+
+
+def train_ssd(params: Params):
     # Prepare dataset
     transform = Compose([Resize((300, 300)), ToTensor()])
     train_dataset = BallAnnotated3kYOLOV5Dataset(
@@ -36,24 +43,23 @@ def ssd_ball_detector(params: Params):
         mode="valid",
         num_workers=params.num_workers,
     )
-    dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True, collate_fn=lambda x: tuple(zip(*x))),
+    dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
+                                       collate_fn=lambda x: tuple(zip(*x))),
                    'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
 
     # Create SSD model with 2 classes (background + ball)
     num_classes = 2  # background + ball
-    model = ssd300_vgg16(num_classes=2)
+    model = ssd_ball_detector()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = "mps"
+    # if torch.mps.device_count() > 0:
+    #     device = "mps"
     model.to(device)
-
-    # Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=params.lr) #momentum=0.9, weight_decay=5e-4)
-
     # Training loop
-    num_epochs = params.epochs
     model.train()
 
+    optimizer = torch.optim.Adam(model.parameters(), lr=params.lr)  # momentum=0.9, weight_decay=5e-4)
+    num_epochs = params.epochs
     for epoch in tqdm(range(num_epochs)):
         total_loss = 0.0
 
@@ -91,6 +97,5 @@ def ssd_ball_detector(params: Params):
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
     torch.save(model.state_dict(), model_filepath)
 
-
 if __name__ == '__main__':
-    ssd_ball_detector(Params("../config.txt"))
+    print(ssd_ball_detector())

@@ -1,7 +1,7 @@
 import argparse
 
 from misc.config import Params
-from models.ssd_voc import ssd_ball_detector
+from models.ssd_voc import train_ssd
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -11,6 +11,6 @@ if __name__ == '__main__':
     print('Config path: {}'.format(args.config))
 
     params = Params(args.config)
-    ssd_ball_detector(params)
+    train_ssd(params)
 
 
