@@ -13,7 +13,7 @@ from misc.config import Params
 def make_dfl_dataloaders(params: Params):
     train_image_size = (720, 1280)
     # transform = augmentation.TrainAugmentation(size=train_image_size)
-    transform = Compose([ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+    train_transform = Compose([ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
                          RandomAffine(degrees=5, scale=(0.8, 1.2)),
                          RandomHorizontalFlip(),
                          # RandomCrop(train_image_size),
@@ -22,7 +22,7 @@ def make_dfl_dataloaders(params: Params):
     val_transform = Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=transform,
+        transform=train_transform,
         mode="train",
         num_workers=params.num_workers,
     )
