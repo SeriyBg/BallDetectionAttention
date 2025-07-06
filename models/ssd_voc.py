@@ -5,10 +5,12 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.models.detection import ssd300_vgg16
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
-from torchvision.transforms import Compose, ToTensor
+from torchvision.transforms import Compose, ToTensor, Resize, Normalize
 from tqdm import tqdm
 
+from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
+from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
 from misc.config import Params
 
 MODEL_FOLDER = 'saved_models'
@@ -25,32 +27,34 @@ def ssd_ball_detector():
 
 def train_ssd(params: Params):
     # Prepare dataset
-    # transform = Compose([Resize((300, 300)), ToTensor()])
-    transform = Compose([ToTensor()])
-    train_dataset = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=transform,
-        mode="train",
-        num_workers=params.num_workers,
-    )
-    val_dataset = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=transform,
-        mode="valid",
-        num_workers=params.num_workers,
-    )
-    dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
-                                       collate_fn=lambda x: tuple(zip(*x))),
-                   'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
+    # transform = Compose([Resize((300, 300)), ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
 
+    # transform = Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
+    # train_dataset = BallAnnotated3kYOLOV5Dataset(
+    #     root=params.dfl_path,
+    #     transform=transform,
+    #     mode="train",
+    #     num_workers=params.num_workers,
+    # )
+    # val_dataset = BallAnnotated3kYOLOV5Dataset(
+    #     root=params.dfl_path,
+    #     transform=transform,
+    #     mode="valid",
+    #     num_workers=params.num_workers,
+    # )
+    # dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
+    #                                    collate_fn=lambda x: tuple(zip(*x))),
+    #                'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
+
+    dataloaders = make_dfl_dataloaders(params)
     # Create SSD model with 2 classes (background + ball)
     num_classes = 2  # background + ball
     model = ssd_ball_detector()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    # if torch.mps.device_count() > 0:
-    #     device = "mps"
+    if torch.mps.device_count() > 0:
+        device = "mps"
     model.to(device)
     # Training loop
     model.train()

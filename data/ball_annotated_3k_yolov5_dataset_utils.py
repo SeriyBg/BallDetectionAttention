@@ -1,11 +1,43 @@
 import os
 
 import cv2
-from torchvision.transforms import ToPILImage
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Resize, ToTensor
+from torchvision.transforms import Compose, Resize, ToTensor, ColorJitter, RandomAffine, RandomCrop, Normalize, \
+    RandomHorizontalFlip
 
+from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
+from misc.config import Params
+
+
+def make_dfl_dataloaders(params: Params):
+    train_image_size = (720, 1280)
+    # transform = augmentation.TrainAugmentation(size=train_image_size)
+    transform = Compose([ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+                         RandomAffine(degrees=5, scale=(0.8, 1.2)),
+                         RandomHorizontalFlip(),
+                         # RandomCrop(train_image_size),
+                         ToTensor(),
+                         Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
+    val_transform = Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
+    train_dataset = BallAnnotated3kYOLOV5Dataset(
+        root=params.dfl_path,
+        transform=transform,
+        mode="train",
+        num_workers=params.num_workers,
+    )
+    val_dataset = BallAnnotated3kYOLOV5Dataset(
+        root=params.dfl_path,
+        transform=val_transform,
+        mode="valid",
+        num_workers=params.num_workers,
+    )
+
+    dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
+                                       collate_fn=lambda x: tuple(zip(*x))),
+                   'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
+    return dataloaders
+
 
 if __name__ == '__main__':
     # Dataset and transform
