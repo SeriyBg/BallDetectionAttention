@@ -1,4 +1,5 @@
 import os
+import pickle
 import time
 
 import torch
@@ -26,26 +27,6 @@ def ssd_ball_detector():
 
 
 def train_ssd(params: Params):
-    # Prepare dataset
-    # transform = Compose([Resize((300, 300)), ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
-
-    # transform = Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
-    # train_dataset = BallAnnotated3kYOLOV5Dataset(
-    #     root=params.dfl_path,
-    #     transform=transform,
-    #     mode="train",
-    #     num_workers=params.num_workers,
-    # )
-    # val_dataset = BallAnnotated3kYOLOV5Dataset(
-    #     root=params.dfl_path,
-    #     transform=transform,
-    #     mode="valid",
-    #     num_workers=params.num_workers,
-    # )
-    # dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
-    #                                    collate_fn=lambda x: tuple(zip(*x))),
-    #                'val': DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))}
-
     dataloaders = make_dfl_dataloaders(params)
     # Create SSD model with 2 classes (background + ball)
     num_classes = 2  # background + ball
@@ -53,8 +34,8 @@ def train_ssd(params: Params):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    # if torch.mps.device_count() > 0:
-    #     device = "mps"
+    if torch.mps.device_count() > 0:
+        device = "mps"
     model.to(device)
     # Training loop
     model.train()
@@ -64,9 +45,9 @@ def train_ssd(params: Params):
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, scheduler_milestones, gamma=0.1)
 
     num_epochs = params.epochs
+    training_stats = {'train': [], 'val': []}
     for epoch in tqdm(range(num_epochs)):
         total_loss = 0.0
-
         for phase, dataloader in dataloaders.items():
             # if phase == 'train':
             #     model.train()
@@ -95,10 +76,14 @@ def train_ssd(params: Params):
 
                     total_loss += loss.item()
 
+            training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
             print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
         scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
+    with open('training_stats_{}.pickle'.format(model_name), 'wb') as handle:
+        pickle.dump(training_stats, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
     torch.save(model.state_dict(), model_filepath)
 
