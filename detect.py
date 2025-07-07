@@ -26,7 +26,7 @@ if __name__ == '__main__':
     model.eval()
     model.to(device)
 
-    image = Image.open("/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5/test/images/1606b0e6_1_352_play_png.rf.22db27e0331fb4d1c396c3fbb57da832.jpg")
+    image = Image.open("/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5/train/images/3c993bd2_0_55_play_png.rf.6c329edba0264f59f3a7bca05b09fd44.jpg")
     boxes, classes, labels = predict(image, model, device, 0.5)
     image = draw_boxes(boxes, classes, labels, image)
     cv2.imshow('Image', image)

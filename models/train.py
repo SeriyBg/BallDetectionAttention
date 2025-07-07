@@ -1,0 +1,68 @@
+import os
+import pickle
+import time
+
+import torch
+from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from tqdm import tqdm
+
+from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
+from misc.config import Params
+from models.ssd_voc import ssd_ball_detector
+
+MODEL_FOLDER = 'saved_models'
+
+
+def train(params: Params):
+    dataloaders = make_dfl_dataloaders(params)
+    model = None
+    if params.model == 'ssd':
+        model = ssd_ball_detector()
+    elif params.model == 'fasterrcnn':
+        model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+    assert model is not None, 'Unknown model type: {}'.format(params.model)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if hasattr(torch.mps, "device_count"):
+        if torch.mps.device_count() > 0:
+            device = "mps"
+    print(f"Using device: {device}")
+    model.to(device)
+    # Training loop
+    model.train()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=params.lr, weight_decay=5e-4)
+    scheduler_milestones = [int(params.epochs * 0.25), int(params.epochs * 0.50), int(params.epochs * 0.75)]
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, scheduler_milestones, gamma=0.1)
+
+    num_epochs = params.epochs
+    training_stats = {'train': [], 'val': []}
+    for epoch in tqdm(range(num_epochs)):
+        total_loss = 0.0
+        for phase, dataloader in dataloaders.items():
+            for images, targets in dataloader:
+                images = [img.to(device) for img in images]
+                targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+                with torch.set_grad_enabled(phase == 'train'):
+                    loss_dict = model(images, targets)
+                    loss = sum(loss_dict.values())
+
+                    optimizer.zero_grad()
+
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+
+                    total_loss += loss.item()
+
+            training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
+            print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
+        scheduler.step()
+
+    model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
+    with open('training_stats_{}.pickle'.format(model_name), 'wb') as handle:
+        pickle.dump(training_stats, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
+    torch.save(model.state_dict(), model_filepath)

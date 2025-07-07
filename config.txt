@@ -8,8 +8,9 @@ dfl_path=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5
 #dfl_path=/workspace/ball_annotated_3k_yolov5
 
 epochs=5
-lr=1e-3
+lr=1e-4
 batch_size=12
 num_workers=6
 
-model=ssd
+#model=ssd
+model=fasterrcnn
