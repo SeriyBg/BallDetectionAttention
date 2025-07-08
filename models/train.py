@@ -3,7 +3,7 @@ import pickle
 import time
 
 import torch
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from torchvision.models.detection import fasterrcnn_resnet50_fpn, fasterrcnn_mobilenet_v3_large_fpn
 from tqdm import tqdm
 
 from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
@@ -20,6 +20,8 @@ def train(params: Params):
         model = ssd_ball_detector()
     elif params.model == 'fasterrcnn':
         model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+    elif params.model == 'fasterrcnn_mobilenet':
+        model = fasterrcnn_mobilenet_v3_large_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
     assert model is not None, 'Unknown model type: {}'.format(params.model)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
