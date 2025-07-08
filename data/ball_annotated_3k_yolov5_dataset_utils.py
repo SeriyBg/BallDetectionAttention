@@ -11,16 +11,17 @@ from misc.config import Params
 
 
 def make_dfl_dataloaders(params: Params):
+    size = (1280, 720)
     train_transform = Compose([
         # ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
         # RandomAffine(degrees=5, scale=(0.8, 1.2)),
         # RandomHorizontalFlip(),
-        # Resize((300, 300)),
+        Resize(size),
         ToTensor(),
         Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)
     ])
     val_transform = Compose([
-        # Resize((300, 300)),
+        Resize(size),
         ToTensor(),
         Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)
     ])
