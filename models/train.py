@@ -60,8 +60,10 @@ def train(params: Params):
 
             print(loss_dict.keys())
             print(loss_dict)
-            training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
-            print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
+            # training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
+            training_stats[phase].append({'total_loss': total_loss | loss_dict})
+            print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['loss_box_reg']:.4f}; Cls Loss: {loss_dict['loss_classifier']:.4f}; loss_objectness: {loss_dict['loss_objectness']:.4f}, loss_rpn_box_reg: {loss_dict['loss_rpn_box_reg']:.4f}")
+            # print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
         scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
