@@ -58,6 +58,8 @@ def train(params: Params):
 
                     total_loss += loss.item()
 
+            print(loss_dict.keys())
+            print(loss_dict)
             training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
             print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
         scheduler.step()
