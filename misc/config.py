@@ -29,6 +29,7 @@ class Params:
 
         self.model = params.get('model', 'ssd')
         self.model_name = 'model_{}_{}'.format(self.model, get_datetime())
+        self.attention = params.getboolean('attention', False)
 
         # self._check_params()
 

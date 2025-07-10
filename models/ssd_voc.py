@@ -14,8 +14,6 @@ def ssd_ball_detector():
     # Create SSD model with 2 classes (background + ball)
     num_classes = 2  # background + ball
     model = ssd300_vgg16(num_classes=num_classes)
-    model.transform.min_size = (1920, 1080)
-    model.transform.max_size = (1920, 1080)
     return model
 
 if __name__ == '__main__':

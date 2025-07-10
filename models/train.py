@@ -15,14 +15,7 @@ MODEL_FOLDER = 'saved_models'
 
 def train(params: Params):
     dataloaders = make_dfl_dataloaders(params)
-    model = None
-    if params.model == 'ssd':
-        model = ssd_ball_detector()
-    elif params.model == 'fasterrcnn':
-        model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
-    elif params.model == 'fasterrcnn_mobilenet':
-        model = fasterrcnn_mobilenet_v3_large_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
-    assert model is not None, 'Unknown model type: {}'.format(params.model)
+    model = model_factory(params)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if hasattr(torch.mps, "device_count"):
@@ -58,12 +51,12 @@ def train(params: Params):
 
                     total_loss += loss.item()
 
-            # print(loss_dict.keys())
-            # print(loss_dict)
-            # training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
-            training_stats[phase].append({'total_loss': total_loss} | loss_dict)
-            print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['loss_box_reg']:.4f}; Cls Loss: {loss_dict['loss_classifier']:.4f}; RPN cls loss: {loss_dict['loss_objectness']:.4f}, RPN loc loss: {loss_dict['loss_rpn_box_reg']:.4f}")
-            # print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
+            if params.model == 'ssd':
+                training_stats[phase].append({'total_loss': total_loss, 'loc_loss': loss_dict['bbox_regression'].item(), 'cls_loss': loss_dict['classification'].item()})
+                print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['bbox_regression']:.4f}; Cls Loss: {loss_dict['classification']:.4f}")
+            elif params.model == 'fasterrcnn' or params.model == 'fasterrcnn_mobilenet':
+                training_stats[phase].append({'total_loss': total_loss} | loss_dict)
+                print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['loss_box_reg']:.4f}; Cls Loss: {loss_dict['loss_classifier']:.4f}; RPN cls loss: {loss_dict['loss_objectness']:.4f}, RPN loc loss: {loss_dict['loss_rpn_box_reg']:.4f}")
         scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
@@ -72,3 +65,15 @@ def train(params: Params):
 
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
     torch.save(model.state_dict(), model_filepath)
+
+
+def model_factory(params: Params):
+    model = None
+    if params.model == 'ssd':
+        model = ssd_ball_detector()
+    elif params.model == 'fasterrcnn':
+        model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+    elif params.model == 'fasterrcnn_mobilenet':
+        model = fasterrcnn_mobilenet_v3_large_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+    assert model is not None, 'Unknown model type: {}'.format(params.model)
+    return model

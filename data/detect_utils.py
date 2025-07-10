@@ -1,7 +1,9 @@
+import torch
 import torchvision.transforms as transforms
 import cv2
 import numpy as np
 
+from data.augmentation import NORMALIZATION_STD, NORMALIZATION_MEAN
 
 coco_names = [
     '__background__', 'ball'
@@ -27,7 +29,7 @@ def predict(image, model, device, detection_threshold):
     # transform the image to tensor
     image = transform(image).to(device)
     # add a batch dimension
-    image = image.unsqueeze(0) 
+    image = image.unsqueeze(0)
     # get the predictions on the image
     outputs = model(image) 
 
@@ -48,13 +50,24 @@ def predict(image, model, device, detection_threshold):
     return boxes, pred_classes, outputs[0]['labels']
 
 
-def draw_boxes(boxes, classes, labels, image):
+def draw_boxes(image, boxes, labels, scores, detection_threshold):
     """
     Draws the bounding box around a detected object.
     """
-    image = cv2.cvtColor(np.asarray(image), cv2.COLOR_BGR2RGB)
+    image = denormalize(image, mean=NORMALIZATION_MEAN, std=NORMALIZATION_STD)
+    image = np.asarray(image.permute(1, 2, 0))
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # classes = [coco_names[int(i)] for i in labels]
+    labels = labels.detach().numpy()
+    boxes = boxes.detach().numpy()
+    classes = [
+        coco_names[int(i)] if 0 <= i < len(coco_names) else f"__background__"
+        for i in labels
+    ]
     for i, box in enumerate(boxes):
-        color = COLORS[labels[i]]
+        if scores[i] < detection_threshold:
+            continue
+        color = COLORS[int(labels[i])]
         cv2.rectangle(
             image,
             (int(box[0]), int(box[1])),
@@ -62,6 +75,20 @@ def draw_boxes(boxes, classes, labels, image):
             color, 2
         )
         cv2.putText(image, classes[i], (int(box[0]), int(box[1]-5)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2, 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2,
                     lineType=cv2.LINE_AA)
     return image
+
+
+def denormalize(tensor, mean, std):
+    """
+    Args:
+        tensor (Tensor): shape (C, H, W), normalized
+        mean (list): mean used in normalization
+        std (list): std used in normalization
+    Returns:
+        Tensor: denormalized tensor, still (C, H, W)
+    """
+    mean = torch.tensor(mean, device=tensor.device).view(-1, 1, 1)
+    std = torch.tensor(std, device=tensor.device).view(-1, 1, 1)
+    return tensor * std + mean
