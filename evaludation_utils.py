@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchmetrics.detection import MeanAveragePrecision
 from torchvision.transforms import ToTensor, Normalize
+from torchvision.transforms.v2 import Compose
 from tqdm import tqdm
 
 from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     ds = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
         transform=ToTensor(),
+        # transform=Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)]),
         mode="test",
         num_workers=params.num_workers,
     )
@@ -41,8 +43,10 @@ if __name__ == '__main__':
     all_preds = []
     all_targets = []
 
+    model_path = "/Users/sergebishyr/PhD/Courses/BallDetectionAttention/saved_models/ssd_20250709_1357_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/mobinet_fasterrcnn_e679c8f0d54f5aae6177e0e5c645a3c69e31e16c/fasterrcnn_20250708_1535_final.pth"
     state_dict = torch.load(
-        "/Users/sergebishyr/PhD/Courses/BallDetectionAttention/saved_models/ssd_20250709_1357_final.pth",
+        model_path,
         map_location=device)
     model.load_state_dict(state_dict)
     model.eval()

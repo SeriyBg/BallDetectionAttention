@@ -1,11 +1,8 @@
-import os
-
 import cv2
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Resize, ToTensor, ColorJitter, RandomAffine, RandomCrop, Normalize, \
-    RandomHorizontalFlip
+from torchvision.transforms import Compose, Normalize
 
-from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD
+from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD, ToTensorAndNormalize, BallCropTransform, ToTensor
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from data.ball_crop_dataset import BallCropWrapperDataset
 from misc.config import Params
@@ -13,33 +10,18 @@ from misc.config import Params
 
 def make_dfl_dataloaders(params: Params):
     # size = (1280, 720)
-    train_transform = Compose([
-        # ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
-        # RandomAffine(degrees=5, scale=(0.8, 1.2)),
-        # RandomHorizontalFlip(),
-        # Resize(size),
-        # ToTensor(),
-        Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)
-    ])
-    val_transform = Compose([
-        # Resize(size),
-        # ToTensor(),
-        Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)
-    ])
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=ToTensor(),
+        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
         mode="train",
         num_workers=params.num_workers,
     )
-    train_dataset = BallCropWrapperDataset(train_dataset, transform=train_transform)
     val_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=ToTensor(),
+        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
         mode="valid",
         num_workers=params.num_workers,
     )
-    val_dataset = BallCropWrapperDataset(val_dataset, transform=train_transform)
 
     dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
                                        collate_fn=lambda x: tuple(zip(*x))),
@@ -49,14 +31,20 @@ def make_dfl_dataloaders(params: Params):
 
 if __name__ == '__main__':
     # Base dataset (no transform — we'll operate on raw image for visualization)
-    base_dataset = BallAnnotated3kYOLOV5Dataset(
+    dataset = BallAnnotated3kYOLOV5Dataset(
         root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
-        transform=ToTensor(),
+        transform=Compose([
+            BallCropTransform(),
+            ToTensor(),
+            # ToTensorAndNormalize(),
+        ]),
         mode="train"
     )
 
     # Wrap it with 300x300 ball-aware crop
-    dataset = BallCropWrapperDataset(base_dataset, crop_size=300)
+    # dataset = BallCropWrapperDataset(base_dataset,
+    #                                  transform=None,
+    #                                  crop_size=512)
 
     for idx in range(len(dataset)):
         image_tensor, target = dataset[idx]  # image_tensor: (C, H, W)

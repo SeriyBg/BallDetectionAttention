@@ -4,7 +4,7 @@ from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn, Fast
 from torchvision.models.detection.backbone_utils import BackboneWithFPN
 
 from misc.config import Params
-from models.se_block import SEBlock
+from models.attention import SEBlock
 
 
 def fasterrccn(params: Params):

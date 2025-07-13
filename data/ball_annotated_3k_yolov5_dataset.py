@@ -26,9 +26,6 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
         image = Image.open(image_path).convert("RGB")
         width, height = image.size
 
-        if self.transform:
-            image = self.transform(image)
-
         boxes = []
         labels = []
 
@@ -65,6 +62,9 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
                 "boxes": torch.empty((0, 4), dtype=torch.float32),
                 "labels": torch.empty((0,), dtype=torch.int64)
             }
+
+        if self.transform:
+            image, target = self.transform((image, target))
 
         return image, target
 

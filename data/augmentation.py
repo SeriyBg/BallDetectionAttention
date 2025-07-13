@@ -1,6 +1,7 @@
 # FootAndBall: Integrated Player and Ball Detector
 # Jacek Komorowski, Grzegorz Kurzejamski, Grzegorz Sarwas
 # Copyright (c) 2020 Sport Algorithmics and Gaming
+import torch
 from PIL import Image
 import numpy as np
 import numbers
@@ -308,8 +309,8 @@ class ToTensorAndNormalize(object):
     def __call__(self, sample):
         # numpy image: H x W x C
         # torch image: C X H X W
-        image, boxes, classes = sample
-        return self.image_transforms(image), boxes, classes
+        image, target = sample
+        return self.image_transforms(image), target
 
 
 class ToTensor(object):
@@ -320,8 +321,87 @@ class ToTensor(object):
     def __call__(self, sample):
         # numpy image: H x W x C
         # torch image: C X H X W
-        image, boxes, classes = sample
-        return self.image_transforms(image), boxes, classes
+        image, target = sample
+        return self.image_transforms(image), target
+
+
+from PIL import Image
+import numpy as np
+import torch
+import random
+
+class BallCropTransform:
+    def __init__(self, crop_size=300):
+        self.crop_size = crop_size
+
+    def __call__(self, sample):
+        image, target = sample
+
+        if not isinstance(image, Image.Image):
+            raise TypeError("Expected PIL.Image, got {}".format(type(image)))
+
+        img_np = np.array(image)  # shape: (H, W, C)
+        H, W, _ = img_np.shape
+
+        if len(target["boxes"]) == 0:
+            crop_top = max(0, (H - self.crop_size) // 2)
+            crop_left = max(0, (W - self.crop_size) // 2)
+        else:
+            box = target["boxes"][0]
+            x_min, y_min, x_max, y_max = box.tolist()
+            cx = (x_min + x_max) / 2
+            cy = (y_min + y_max) / 2
+
+            crop_left_min = max(0, int(cx) - self.crop_size + 1)
+            crop_left_max = min(int(cx), W - self.crop_size)
+            crop_top_min = max(0, int(cy) - self.crop_size + 1)
+            crop_top_max = min(int(cy), H - self.crop_size)
+
+            if crop_left_max < crop_left_min or crop_top_max < crop_top_min:
+                crop_left = min(max(0, int(cx) - self.crop_size // 2), W - self.crop_size)
+                crop_top = min(max(0, int(cy) - self.crop_size // 2), H - self.crop_size)
+            else:
+                crop_left = random.randint(crop_left_min, crop_left_max)
+                crop_top = random.randint(crop_top_min, crop_top_max)
+
+        # Crop image and convert back to PIL
+        img_crop = img_np[crop_top:crop_top + self.crop_size, crop_left:crop_left + self.crop_size, :]
+        cropped_img = Image.fromarray(img_crop)
+
+        # Adjust bounding boxes
+        new_boxes = []
+        new_labels = []
+        for box, label in zip(target["boxes"], target["labels"]):
+            x1, y1, x2, y2 = box.tolist()
+            x1_new = x1 - crop_left
+            y1_new = y1 - crop_top
+            x2_new = x2 - crop_left
+            y2_new = y2 - crop_top
+
+            if x2_new <= 0 or y2_new <= 0 or x1_new >= self.crop_size or y1_new >= self.crop_size:
+                continue
+
+            x1_new = np.clip(x1_new, 0, self.crop_size)
+            y1_new = np.clip(y1_new, 0, self.crop_size)
+            x2_new = np.clip(x2_new, 0, self.crop_size)
+            y2_new = np.clip(y2_new, 0, self.crop_size)
+
+            new_boxes.append([x1_new, y1_new, x2_new, y2_new])
+            new_labels.append(label)
+
+        if new_boxes:
+            target = {
+                "boxes": torch.tensor(new_boxes, dtype=torch.float32),
+                "labels": torch.tensor(new_labels, dtype=torch.int64)
+            }
+        else:
+            target = {
+                "boxes": torch.empty((0, 4), dtype=torch.float32),
+                "labels": torch.empty((0,), dtype=torch.int64)
+            }
+
+        return cropped_img, target
+
 
 
 class TrainAugmentation(object):
