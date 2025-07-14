@@ -19,9 +19,9 @@ def train(params: Params):
     model = model_factory(params)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if hasattr(torch.mps, "device_count"):
-        if torch.mps.device_count() > 0:
-            device = "mps"
+    # if hasattr(torch.mps, "device_count"):
+    #     if torch.mps.device_count() > 0:
+    #         device = "mps"
     print(f"Using device: {device}")
     model.to(device)
     # Training loop
