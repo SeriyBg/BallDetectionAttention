@@ -1,10 +1,9 @@
 import cv2
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize
+from torchvision.transforms import Compose
 
-from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD, ToTensorAndNormalize, BallCropTransform, ToTensor
+from data.augmentation import ToTensorAndNormalize, BallCropTransform, ToTensor, Resize
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
-from data.ball_crop_dataset import BallCropWrapperDataset
 from misc.config import Params
 
 
@@ -34,17 +33,13 @@ if __name__ == '__main__':
     dataset = BallAnnotated3kYOLOV5Dataset(
         root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
         transform=Compose([
-            BallCropTransform(),
+            Resize((720, 1280)),
+            # BallCropTransform(),
             ToTensor(),
             # ToTensorAndNormalize(),
         ]),
         mode="train"
     )
-
-    # Wrap it with 300x300 ball-aware crop
-    # dataset = BallCropWrapperDataset(base_dataset,
-    #                                  transform=None,
-    #                                  crop_size=512)
 
     for idx in range(len(dataset)):
         image_tensor, target = dataset[idx]  # image_tensor: (C, H, W)

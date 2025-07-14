@@ -3,9 +3,9 @@ import argparse
 import cv2
 import torch
 from torch.utils.data import DataLoader
-from torchvision.transforms import Normalize, ToTensor, Compose
+from torchvision.transforms import Compose
 
-from data.augmentation import NORMALIZATION_MEAN, NORMALIZATION_STD
+from data.augmentation import BallCropTransform, ToTensorAndNormalize
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from data.ball_crop_dataset import BallCropWrapperDataset
 from data.detect_utils import draw_boxes
@@ -25,8 +25,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    model_path = "/Users/sergebishyr/PhD/Courses/BallDetectionAttention/saved_models/ssd_20250709_1357_final.pth"
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_no_resize_dfl.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1652_final.pth"
     state_dict = torch.load(model_path,
                             map_location=device)
     model.load_state_dict(state_dict)
@@ -36,7 +35,7 @@ if __name__ == '__main__':
 
     ds = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([ToTensor(), Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)]),
+        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
         mode="test",
         num_workers=params.num_workers,
     )

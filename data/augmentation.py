@@ -1,16 +1,15 @@
 # FootAndBall: Integrated Player and Ball Detector
 # Jacek Komorowski, Grzegorz Kurzejamski, Grzegorz Sarwas
 # Copyright (c) 2020 Sport Algorithmics and Gaming
-import torch
-from PIL import Image
-import numpy as np
 import numbers
+
+from PIL import Image
+import torch
 import random
 import cv2
-
+import numpy as np
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
-from PIL.ImageTransform import AffineTransform
 
 # Labels starting from 0
 BALL_LABEL = 1
@@ -325,11 +324,6 @@ class ToTensor(object):
         return self.image_transforms(image), target
 
 
-from PIL import Image
-import numpy as np
-import torch
-import random
-
 class BallCropTransform:
     def __init__(self, crop_size=300):
         self.crop_size = crop_size
@@ -401,6 +395,33 @@ class BallCropTransform:
             }
 
         return cropped_img, target
+
+
+class Resize:
+    def __init__(self, size=(300, 300)):
+        self.size = size  # (width, height)
+        self.image_transform = transforms.Resize(size)
+
+    def __call__(self, sample):
+        image, target = sample
+        orig_h, orig_w = image.size  # PIL image: (W, H)
+
+        # Resize image
+        resized_image = self.image_transform(image)
+
+        # Resize boxes
+        new_w, new_h = self.size
+        scale_x = new_w / orig_w
+        scale_y = new_h / orig_h
+
+        if "boxes" in target:
+            boxes = target["boxes"]
+            if boxes.numel() > 0:
+                boxes[:, [0, 2]] = boxes[:, [0, 2]] * scale_x  # x1, x2
+                boxes[:, [1, 3]] = boxes[:, [1, 3]] * scale_y  # y1, y2
+                target["boxes"] = boxes
+
+        return resized_image, target
 
 
 
