@@ -12,7 +12,7 @@ lr=1e-4
 batch_size=12
 num_workers=6
 
-attention=True
+attention=False
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
-model=ssd
+model=fasterrcnn_mobilenet

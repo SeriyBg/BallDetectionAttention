@@ -3,11 +3,12 @@ import pickle
 import time
 
 import torch
-from torchvision.models.detection import fasterrcnn_resnet50_fpn, fasterrcnn_mobilenet_v3_large_fpn
+from torchvision.models.detection import fasterrcnn_resnet50_fpn
 from tqdm import tqdm
 
 from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
 from misc.config import Params
+from models.fasterrcnn import fasterrccn_mobile
 from models.ssd_voc import ssd_ball_detector
 
 MODEL_FOLDER = 'saved_models'
@@ -74,6 +75,6 @@ def model_factory(params: Params):
     elif params.model == 'fasterrcnn':
         model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
     elif params.model == 'fasterrcnn_mobilenet':
-        model = fasterrcnn_mobilenet_v3_large_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+        model = fasterrccn_mobile(params)
     assert model is not None, 'Unknown model type: {}'.format(params.model)
     return model

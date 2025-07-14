@@ -11,13 +11,13 @@ def make_dfl_dataloaders(params: Params):
     # size = (1280, 720)
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
+        transform=Compose([Resize((720, 1280)), BallCropTransform(), ToTensorAndNormalize()]),
         mode="train",
         num_workers=params.num_workers,
     )
     val_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
+        transform=Compose([Resize((720, 1280)), BallCropTransform(), ToTensorAndNormalize()]),
         mode="valid",
         num_workers=params.num_workers,
     )
