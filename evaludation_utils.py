@@ -6,7 +6,7 @@ from torchmetrics.detection import MeanAveragePrecision
 from torchvision.transforms import Compose
 from tqdm import tqdm
 
-from data.augmentation import BallCropTransform, ToTensorAndNormalize
+from data.augmentation import BallCropTransform, ToTensorAndNormalize, Resize
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from misc.config import Params
 from models.train import model_factory
@@ -26,8 +26,12 @@ if __name__ == '__main__':
 
     ds = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
-        mode="test",
+        transform=Compose([
+            Resize((720, 1280)),
+            # BallCropTransform(),
+            ToTensorAndNormalize()
+        ]),
+        mode="valid",
         num_workers=params.num_workers,
     )
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
@@ -41,6 +45,7 @@ if __name__ == '__main__':
 
     model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1405_final.pth"
     model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1652_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_eef54cc615b9b72e7f2a4f39152e8db248340bcb/ssd_20250714_1632_final.pth"
     state_dict = torch.load(
         model_path,
         map_location=device)

@@ -5,9 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
 
-from data.augmentation import BallCropTransform, ToTensorAndNormalize
+from data.augmentation import BallCropTransform, ToTensorAndNormalize, Resize
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
-from data.ball_crop_dataset import BallCropWrapperDataset
 from data.detect_utils import draw_boxes
 from misc.config import Params
 from models.train import model_factory
@@ -25,7 +24,8 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1652_final.pth"
+    # model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1652_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_eef54cc615b9b72e7f2a4f39152e8db248340bcb/ssd_20250714_1632_final.pth"
     state_dict = torch.load(model_path,
                             map_location=device)
     model.load_state_dict(state_dict)
@@ -35,11 +35,14 @@ if __name__ == '__main__':
 
     ds = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([BallCropTransform(), ToTensorAndNormalize()]),
+        transform=Compose([
+            Resize((720, 1280)),
+            # BallCropTransform(),
+            ToTensorAndNormalize()
+        ]),
         mode="test",
         num_workers=params.num_workers,
     )
-    ds = BallCropWrapperDataset(ds, transform=None)
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
                collate_fn=lambda x: tuple(zip(*x)))
     for images, _ in dl:
