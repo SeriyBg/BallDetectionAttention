@@ -12,8 +12,8 @@ def make_dfl_dataloaders(params: Params):
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
         transform=Compose([
-            Resize((720, 1280)),
-            # BallCropTransform(),
+            # Resize((720, 1280)),
+            BallCropTransform(720),
             ToTensorAndNormalize()]),
         mode="train",
         num_workers=params.num_workers,
@@ -21,8 +21,8 @@ def make_dfl_dataloaders(params: Params):
     val_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
         transform=Compose([
-            Resize((720, 1280)),
-            # BallCropTransform(),
+            # Resize((720, 1280)),
+            BallCropTransform(720),
             ToTensorAndNormalize()]),
         mode="valid",
         num_workers=params.num_workers,
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     dataset = BallAnnotated3kYOLOV5Dataset(
         root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
         transform=Compose([
-            Resize((720, 1280)),
-            # BallCropTransform(),
+            # Resize((720, 1280)),
+            BallCropTransform(720),
             ToTensor(),
             # ToTensorAndNormalize(),
         ]),
