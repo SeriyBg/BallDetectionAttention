@@ -62,18 +62,6 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes):
                 continue  # skip if not a conv layer
             backbone.features[idx] = nn.Sequential(layer, SEBlock(out_ch))
         backbone = _mobilenet_extractor(backbone, True, trainable_backbone_layers)
-        anchor_sizes = (
-                           (
-                               32,
-                               64,
-                               128,
-                               256,
-                               512,
-                           ),
-                       ) * 3
-        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
-        model = FasterRCNN(
-            backbone, num_classes, rpn_anchor_generator=AnchorGenerator(anchor_sizes, aspect_ratios)
-        )
-
+        model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=2, weights_backbone=None)
+        model.backbone = backbone
         return model
