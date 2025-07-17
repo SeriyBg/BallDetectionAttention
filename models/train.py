@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
 from misc.config import Params
-from models.fasterrcnn import fasterrccn_mobile
+from models.fasterrcnn import fasterrccn_mobilnet
 from models.ssd_voc import ssd_ball_detector
 
 MODEL_FOLDER = 'saved_models'
@@ -75,6 +75,6 @@ def model_factory(params: Params):
     elif params.model == 'fasterrcnn':
         model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
     elif params.model == 'fasterrcnn_mobilenet':
-        model = fasterrccn_mobile(params)
+        model = fasterrccn_mobilnet(params)
     assert model is not None, 'Unknown model type: {}'.format(params.model)
     return model
