@@ -1,9 +1,7 @@
 from torch import nn
-from torch import nn
-from torchvision.models import mobilenet_v3_large
-from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn, FasterRCNN, fasterrcnn_resnet50_fpn_v2
-from torchvision.models.detection.anchor_utils import AnchorGenerator
-from torchvision.models.detection.backbone_utils import _mobilenet_extractor, _validate_trainable_layers
+from torchvision.models import mobilenet_v3_large, resnet50
+from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn, fasterrcnn_resnet50_fpn_v2
+from torchvision.models.detection.backbone_utils import _mobilenet_extractor, _resnet_fpn_extractor
 
 from misc.config import Params
 from models.attention import SEBlock
@@ -18,19 +16,36 @@ def fasterrccn(params: Params):
 
 
 def fasterrcnn_resnet50_fpn_attention(num_classes=2):
-    model = fasterrcnn_resnet50_fpn_v2(weights=None, num_classes=2, weights_backbone=None)
+    # Load ResNet-50 backbone (no pretrained weights)
+    backbone = resnet50(weights=None, norm_layer=nn.BatchNorm2d)
 
-    # Replace box predictor
-    in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = nn.Linear(in_features, num_classes)
+    # Insert SE blocks into selected layers of the backbone
+    # We modify layers2 and layers3 (which feed into the FPN)
+    def insert_se(module):
+        if isinstance(module, nn.Sequential):
+            for i, block in enumerate(module):
+                if hasattr(block, 'conv3'):
+                    out_channels = block.conv3.out_channels
+                    block.add_module("se", SEBlock(out_channels))
+        return module
 
-    # Add attention to specific ResNet layers
-    backbone = model.backbone.body
+    backbone.layer2 = insert_se(backbone.layer2)
+    backbone.layer3 = insert_se(backbone.layer3)
 
-    backbone.layer2[1].relu = nn.Sequential(backbone.layer2[1].relu, SEBlock(512))
-    backbone.layer3[1].relu = nn.Sequential(backbone.layer3[1].relu, SEBlock(1024))
-    backbone.layer4[1].relu = nn.Sequential(backbone.layer4[1].relu, SEBlock(2048))
+    # Wrap it with FPN
+    backbone_with_fpn = _resnet_fpn_extractor(
+        backbone=backbone,
+        trainable_layers=5,
+        norm_layer=nn.BatchNorm2d,
+    )
 
+    # Final detector
+    model = fasterrcnn_resnet50_fpn_v2(
+        weights=None,
+        num_classes=num_classes,
+        weights_backbone=None
+    )
+    model.backbone = backbone_with_fpn
     return model
 
 
@@ -39,16 +54,13 @@ def fasterrccn_mobilnet(params: Params):
         model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=2, weights_backbone=None)
     else:
         model = fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes=2)
-    print(model)
-    pytorch_total_params = sum(p.numel() for p in model.parameters())
-    print(pytorch_total_params)
     return model
 
 
 def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes):
         norm_layer = nn.BatchNorm2d
 
-        trainable_backbone_layers = _validate_trainable_layers(False, None, 6, 3)
+        # trainable_backbone_layers = _validate_trainable_layers(False, None, 6, 3)
         trainable_backbone_layers = 4
         backbone = mobilenet_v3_large(weights=None, norm_layer=norm_layer)
         se_layers = [2, 4, 6, 9]

@@ -4,6 +4,9 @@ issia_path=/Users/sergebishyr/PhD/datasets/issia_upd
 issia_train_cameras=1,2,3,4
 issia_val_cameras=5,6
 
+#transform_resize=(720, 1280)
+transform_crop=720
+
 dfl_path=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5
 #dfl_path=/workspace/ball_annotated_3k_yolov5
 

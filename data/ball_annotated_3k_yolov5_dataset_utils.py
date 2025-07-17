@@ -2,7 +2,7 @@ import cv2
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
 
-from data.augmentation import ToTensorAndNormalize, BallCropTransform, ToTensor, Resize
+from data.augmentation import BallCropTransform, ToTensor, augmentations
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from misc.config import Params
 
@@ -11,19 +11,13 @@ def make_dfl_dataloaders(params: Params):
     # size = (1280, 720)
     train_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([
-            # Resize((720, 1280)),
-            BallCropTransform(720),
-            ToTensorAndNormalize()]),
+        transform=augmentations(params),
         mode="train",
         num_workers=params.num_workers,
     )
     val_dataset = BallAnnotated3kYOLOV5Dataset(
         root=params.dfl_path,
-        transform=Compose([
-            # Resize((720, 1280)),
-            BallCropTransform(720),
-            ToTensorAndNormalize()]),
+        transform=augmentations(params),
         mode="valid",
         num_workers=params.num_workers,
     )
@@ -39,10 +33,8 @@ if __name__ == '__main__':
     dataset = BallAnnotated3kYOLOV5Dataset(
         root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
         transform=Compose([
-            # Resize((720, 1280)),
             BallCropTransform(720),
             ToTensor(),
-            # ToTensorAndNormalize(),
         ]),
         mode="train"
     )

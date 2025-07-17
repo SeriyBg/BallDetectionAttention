@@ -11,6 +11,8 @@ import numpy as np
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
+from misc.config import Params
+
 # Labels starting from 0
 BALL_LABEL = 1
 PLAYER_LABEL = 2
@@ -449,3 +451,14 @@ class NoAugmentation(object):
 
     def __call__(self, sample):
         return self.augment(sample)
+
+
+def augmentations(params: Params):
+    transform_list = []
+    if params.transform_resize:
+        transform_list.append(Resize(params.transform_resize))
+    if params.transform_crop:
+        transform_list.append(BallCropTransform(params.transform_crop))
+
+    transform_list.append(ToTensorAndNormalize())
+    return transforms.Compose(transform_list)

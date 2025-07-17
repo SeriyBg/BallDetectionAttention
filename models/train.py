@@ -3,12 +3,12 @@ import pickle
 import time
 
 import torch
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from prettytable import PrettyTable
 from tqdm import tqdm
 
 from data.ball_annotated_3k_yolov5_dataset_utils import make_dfl_dataloaders
 from misc.config import Params
-from models.fasterrcnn import fasterrccn_mobilnet
+from models.fasterrcnn import fasterrccn_mobilnet, fasterrccn
 from models.ssd_voc import ssd_ball_detector
 
 MODEL_FOLDER = 'saved_models'
@@ -73,8 +73,19 @@ def model_factory(params: Params):
     if params.model == 'ssd':
         model = ssd_ball_detector(params.attention)
     elif params.model == 'fasterrcnn':
-        model = fasterrcnn_resnet50_fpn(Pretrained=False, num_classes=2, pretrained_backbone=False)
+        model = fasterrccn(params)
     elif params.model == 'fasterrcnn_mobilenet':
         model = fasterrccn_mobilnet(params)
     assert model is not None, 'Unknown model type: {}'.format(params.model)
+    print(model)
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad:
+            continue
+        params = parameter.numel()
+        table.add_row([name, params])
+        total_params += params
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
     return model

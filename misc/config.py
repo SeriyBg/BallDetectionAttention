@@ -1,6 +1,7 @@
 import os
 import configparser
 import time
+from ast import literal_eval
 
 
 class Params:
@@ -30,6 +31,12 @@ class Params:
         self.model = params.get('model', 'ssd')
         self.model_name = 'model_{}_{}'.format(self.model, get_datetime())
         self.attention = params.getboolean('attention', False)
+        resize = params.get('transform_resize', None)
+        if resize:
+            self.transform_resize = literal_eval(resize)
+        else :
+            self.transform_resize = None
+        self.transform_crop = params.getint('transform_crop')
 
         # self._check_params()
 
