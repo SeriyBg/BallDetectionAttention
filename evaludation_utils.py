@@ -2,7 +2,7 @@ import argparse
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchmetrics.detection import MeanAveragePrecision
 from torchvision.transforms import Compose
 from tqdm import tqdm
@@ -25,12 +25,15 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    ds = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=augmentations(params),
-        mode="test",
-        num_workers=params.num_workers,
-    )
+    dfl_test = []
+    for _, dfl_path in enumerate(params.dfl_paths):
+        dfl_test.append(BallAnnotated3kYOLOV5Dataset(
+            root=dfl_path,
+            transform=augmentations(params),
+            mode="test",
+            num_workers=params.num_workers,
+        ))
+    ds = ConcatDataset(dfl_test) if len(dfl_test) > 1 else dfl_test[0]
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
                     collate_fn=lambda x: tuple(zip(*x)))
 
@@ -42,7 +45,7 @@ if __name__ == '__main__':
 
     model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1405_final.pth"
     # model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_crop_300_7aa39cdbadd65be59321ec520834dcf77e680497/ssd_20250713_1652_final.pth"
-    # model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_eef54c9cec1a9bfcdee987e0d4d5a9aad34678c9fcbd05/ssd_20250715_1256_final.pth"
+    # model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_9bc4a80d3d4bd8f346dd61995f5967b6f6069321/ssd_20250717_1745_final.pth"
     model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_attention_9bc4a80d3d4bd8f346dd61995f5967b6f6069321/ssd_20250717_1408_final.pth"
     state_dict = torch.load(
         model_path,

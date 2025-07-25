@@ -20,8 +20,11 @@ class Params:
             temp = params.get('issia_val_cameras', '5, 6')
             self.issia_val_cameras = [int(e) for e in temp.split(',')]
 
-        self.dfl_path = params.get('dfl_path', None)
-        # if self.dfl_path is not None:
+        self.dfl_paths = []
+        dfl_paths = params.get('dfl_paths', None)
+        if dfl_paths is not None:
+            for path in dfl_paths.split(','):
+                self.dfl_paths.append(path)
 
         self.num_workers = params.getint('num_workers', 0)
         self.batch_size = params.getint('batch_size', 4)
@@ -41,15 +44,14 @@ class Params:
         # self._check_params()
 
     def _check_params(self):
-        assert os.path.exists(self.issia_path), "Cannot access ISSIA CNR dataset: {}".format(self.issia_path)
-        assert self.dfl_path is None or os.path.exists(self.dfl_path), "Cannot access SoccerPlayerDetection_bmvc17 dataset: {}".format(self.dfl_path)
-        for c in self.issia_train_cameras:
-            assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
-        for c in self.issia_val_cameras:
-            assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
-        if self.dfl_path is not None:
-            for c in self.dfl_path:
-                assert c == 1 or c == 2, 'SPD dataset number must be 1 or 2. Is: {}'.format(c)
+        assert len(self.dfl_paths) > 0, "At least one DFL dataset path must be provided"
+        for _, dfl_path in enumerate(self.dfl_paths):
+            assert dfl_path is None or os.path.exists(dfl_path), "Cannot access DFL dataset: {}".format(dfl_path)
+        # assert os.path.exists(self.issia_path), "Cannot access ISSIA CNR dataset: {}".format(self.issia_path)
+        # for c in self.issia_train_cameras:
+        #     assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
+        # for c in self.issia_val_cameras:
+        #     assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
 
     def print(self):
         print('Parameters:')

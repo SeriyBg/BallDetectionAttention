@@ -1,5 +1,5 @@
 import cv2
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import Compose
 
 from data.augmentation import BallCropTransform, ToTensor, augmentations
@@ -9,18 +9,23 @@ from misc.config import Params
 
 def make_dfl_dataloaders(params: Params):
     # size = (1280, 720)
-    train_dataset = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=augmentations(params),
-        mode="train",
-        num_workers=params.num_workers,
-    )
-    val_dataset = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=augmentations(params),
-        mode="valid",
-        num_workers=params.num_workers,
-    )
+    dfl_train = []
+    dfl_val = []
+    for _, dfl_path in enumerate(params.dfl_paths):
+        dfl_train.append(BallAnnotated3kYOLOV5Dataset(
+            root=dfl_path,
+            transform=augmentations(params),
+            mode="train",
+            num_workers=params.num_workers,
+        ))
+        dfl_val.append(BallAnnotated3kYOLOV5Dataset(
+            root=dfl_path,
+            transform=augmentations(params),
+            mode="valid",
+            num_workers=params.num_workers,
+        ))
+    train_dataset = ConcatDataset(dfl_train) if len(dfl_train) > 1 else dfl_train[0]
+    val_dataset = ConcatDataset(dfl_val) if len(dfl_val) > 1 else dfl_val[0]
 
     dataloaders = {'train': DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True,
                                        collate_fn=lambda x: tuple(zip(*x))),

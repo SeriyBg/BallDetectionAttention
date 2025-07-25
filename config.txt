@@ -7,15 +7,15 @@ issia_val_cameras=5,6
 #transform_resize=(720, 1280)
 transform_crop=720
 
-dfl_path=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5
-#dfl_path=/workspace/ball_annotated_3k_yolov5
+dfl_paths=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5,/Users/sergebishyr/PhD/datasets/Football (Soccer) Ball Detection - DFL
+#dfl_paths=/workspace/ball_annotated_3k_yolov5
 
 epochs=10
 lr=1e-4
 batch_size=12
 num_workers=6
 
-attention=False
+attention=True
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
 model=fasterrcnn_mobilenet

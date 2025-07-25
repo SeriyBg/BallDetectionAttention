@@ -4,7 +4,7 @@ from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn, fast
 from torchvision.models.detection.backbone_utils import _mobilenet_extractor, _resnet_fpn_extractor
 
 from misc.config import Params
-from models.attention import SEBlock
+from models.attention import SEBlock, CBAM
 
 
 def fasterrccn(params: Params):
@@ -73,6 +73,7 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes):
             else:
                 continue  # skip if not a conv layer
             backbone.features[idx] = nn.Sequential(layer, SEBlock(out_ch))
+            # backbone.features[idx] = nn.Sequential(layer, CBAM(out_ch))
         backbone = _mobilenet_extractor(backbone, True, trainable_backbone_layers)
         model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=2, weights_backbone=None)
         model.backbone = backbone

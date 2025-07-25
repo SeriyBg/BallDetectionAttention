@@ -2,10 +2,9 @@ import argparse
 
 import cv2
 import torch
-from torch.utils.data import DataLoader
-from torchvision.transforms import Compose
+from torch.utils.data import DataLoader, ConcatDataset
 
-from data.augmentation import BallCropTransform, ToTensorAndNormalize, Resize, augmentations
+from data.augmentation import augmentations
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from data.detect_utils import draw_boxes
 from misc.config import Params
@@ -34,12 +33,15 @@ if __name__ == '__main__':
     model.eval()
     model.to(device)
 
-    ds = BallAnnotated3kYOLOV5Dataset(
-        root=params.dfl_path,
-        transform=augmentations(params),
-        mode="test",
-        num_workers=params.num_workers,
-    )
+    dfl_test = []
+    for _, dfl_path in enumerate(params.dfl_paths):
+        dfl_test.append(BallAnnotated3kYOLOV5Dataset(
+            root=dfl_path,
+            transform=augmentations(params),
+            mode="test",
+            num_workers=params.num_workers,
+        ))
+    ds = ConcatDataset(dfl_test) if len(dfl_test) > 1 else dfl_test[0]
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
                collate_fn=lambda x: tuple(zip(*x)))
     for images, _ in dl:
