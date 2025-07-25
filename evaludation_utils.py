@@ -1,13 +1,11 @@
 import argparse
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader, ConcatDataset
 from torchmetrics.detection import MeanAveragePrecision
-from torchvision.transforms import Compose
 from tqdm import tqdm
 
-from data.augmentation import BallCropTransform, ToTensorAndNormalize, Resize, augmentations
+from data.augmentation import augmentations
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from misc.config import Params
 from models.train import model_factory

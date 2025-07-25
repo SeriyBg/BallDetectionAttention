@@ -1,6 +1,6 @@
 import cv2
 from torch.utils.data import DataLoader, ConcatDataset
-from torchvision.transforms import Compose
+from torchvision.transforms.v2 import Compose
 
 from data.augmentation import BallCropTransform, ToTensor, augmentations
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset

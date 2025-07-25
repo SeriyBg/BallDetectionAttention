@@ -1,5 +1,5 @@
 import torch
-import torchvision.transforms as transforms
+import torchvision.transforms.v2 as transforms
 import cv2
 import numpy as np
 

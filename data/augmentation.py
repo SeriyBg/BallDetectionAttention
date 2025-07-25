@@ -8,8 +8,8 @@ import torch
 import random
 import cv2
 import numpy as np
-import torchvision.transforms as transforms
-import torchvision.transforms.functional as F
+import torchvision.transforms.v2 as transforms
+import torchvision.transforms.v2.functional as F
 
 from misc.config import Params
 

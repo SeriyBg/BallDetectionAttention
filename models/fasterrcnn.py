@@ -72,8 +72,8 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes):
                 out_ch = layer.out_channels
             else:
                 continue  # skip if not a conv layer
-            backbone.features[idx] = nn.Sequential(layer, SEBlock(out_ch))
-            # backbone.features[idx] = nn.Sequential(layer, CBAM(out_ch))
+            # backbone.features[idx] = nn.Sequential(layer, SEBlock(out_ch))
+            backbone.features[idx] = nn.Sequential(layer, CBAM(out_ch))
         backbone = _mobilenet_extractor(backbone, True, trainable_backbone_layers)
         model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=2, weights_backbone=None)
         model.backbone = backbone
