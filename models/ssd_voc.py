@@ -17,10 +17,10 @@ def ssd_ball_detector(attention: bool = False, attention_type = 'se'):
     num_classes = 2  # background + ball
     if attention:
         return ssd_ball_detector_attention(num_classes, attention_type)
-    return ssd300_vgg16(num_classes=num_classes)
+    return ssd300_vgg16(num_classes=num_classes, weights_backbone=None)
 
 def ssd_ball_detector_attention(num_classes, attention_type = 'se'):
-    model = ssd300_vgg16(num_classes=num_classes)
+    model = ssd300_vgg16(num_classes=num_classes, weights_backbone=None)
     vgg_features = model.backbone.features
 
     vgg_features[15] = nn.Sequential(vgg_features[15], attention_block(attention_type, 256))  # after conv3_3

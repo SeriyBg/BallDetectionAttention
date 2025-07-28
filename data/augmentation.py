@@ -304,7 +304,8 @@ class CenterCrop:
 class ToTensorAndNormalize(object):
     # Convert image to tensors and normalize the image, ground truth is not changed
     def __init__(self):
-        self.image_transforms = transforms.Compose([transforms.ToTensor(),
+        self.image_transforms = transforms.Compose([transforms.ToImage(),
+                                                    transforms.ToDtype(torch.float32, scale=True),
                                                     transforms.Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD)])
 
     def __call__(self, sample):
@@ -317,13 +318,14 @@ class ToTensorAndNormalize(object):
 class ToTensor(object):
     # Convert image to tensors and normalize the image, ground truth is not changed
     def __init__(self):
-        self.image_transforms = transforms.ToTensor()
+        self.to_image = transforms.ToImage()
+        self.to_dtype = transforms.ToDtype(torch.float32, scale=True)
 
     def __call__(self, sample):
         # numpy image: H x W x C
         # torch image: C X H X W
         image, target = sample
-        return self.image_transforms(image), target
+        return self.to_dtype(self.to_image(image)), target
 
 
 class BallCropTransform:
