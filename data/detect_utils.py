@@ -9,14 +9,13 @@ coco_names = [
     '__background__', 'ball'
 ]
 
-
 # this will help us create a different color for each class
 COLORS = np.random.uniform(0, 255, size=(len(coco_names), 3))
 
-
 # define the torchvision image transforms
 transform = transforms.Compose([
-    transforms.ToTensor(),
+    transforms.ToImage(),
+    transforms.ToDtype(torch.float32, scale=True),
 ])
 
 
@@ -31,7 +30,7 @@ def predict(image, model, device, detection_threshold):
     # add a batch dimension
     image = image.unsqueeze(0)
     # get the predictions on the image
-    outputs = model(image) 
+    outputs = model(image)
 
     # get all the predicited class names
     pred_classes = [
@@ -74,7 +73,7 @@ def draw_boxes(image, boxes, labels, scores, detection_threshold):
             (int(box[2]), int(box[3])),
             color, 2
         )
-        cv2.putText(image, classes[i], (int(box[0]), int(box[1]-5)),
+        cv2.putText(image, classes[i], (int(box[0]), int(box[1] - 5)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2,
                     lineType=cv2.LINE_AA)
     return image
