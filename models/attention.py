@@ -35,3 +35,11 @@ class CBAM(nn.Module):
         avg_pool = torch.mean(x, dim=1, keepdim=True)
         sa = self.spatial_att(torch.cat([max_pool, avg_pool], dim=1))
         return x * sa
+
+
+def attention_block(type, channels, reduction=16):
+    assert type=='se' or type=='cbam'
+    if type=='se':
+        return SEBlock(channels, reduction)
+    elif type=='cbam':
+        return CBAM(channels, reduction)

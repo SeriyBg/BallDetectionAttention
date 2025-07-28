@@ -16,6 +16,7 @@ batch_size=12
 num_workers=6
 
 attention=True
+attention_type=cbam
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
-model=fasterrcnn_mobilenet
+model=ssd

@@ -71,7 +71,7 @@ def train(params: Params):
 def model_factory(params: Params):
     model = None
     if params.model == 'ssd':
-        model = ssd_ball_detector(params.attention)
+        model = ssd_ball_detector(params.attention, params.attention_type)
     elif params.model == 'fasterrcnn':
         model = fasterrccn(params)
     elif params.model == 'fasterrcnn_mobilenet':

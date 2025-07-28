@@ -34,6 +34,7 @@ class Params:
         self.model = params.get('model', 'ssd')
         self.model_name = 'model_{}_{}'.format(self.model, get_datetime())
         self.attention = params.getboolean('attention', False)
+        self.attention_type = params.get('attention_type', 'se')
         resize = params.get('transform_resize', None)
         if resize:
             self.transform_resize = literal_eval(resize)
