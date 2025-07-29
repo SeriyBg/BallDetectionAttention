@@ -73,6 +73,6 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes, attention_type = 's
                 continue  # skip if not a conv layer
             backbone.features[idx] = nn.Sequential(layer, attention_block(attention_type, out_ch))
         backbone = _mobilenet_extractor(backbone, True, trainable_backbone_layers)
-        model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=num_classes, weights_backbone=None)
+        model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=num_classes)
         model.backbone = backbone
         return model
