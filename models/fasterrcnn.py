@@ -17,7 +17,7 @@ def fasterrccn(params: Params):
 
 def fasterrcnn_resnet50_fpn_attention(num_classes=2, attention_type = 'se'):
     # Load ResNet-50 backbone (no pretrained weights)
-    backbone = resnet50(weights=None, norm_layer=nn.BatchNorm2d)
+    backbone = resnet50(norm_layer=nn.BatchNorm2d, num_classes=num_classes)
 
     # Insert SE blocks into selected layers of the backbone
     # We modify layers2 and layers3 (which feed into the FPN)
@@ -61,9 +61,9 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes, attention_type = 's
         norm_layer = nn.BatchNorm2d
 
         trainable_backbone_layers = 4
-        backbone = mobilenet_v3_large(weights=None, norm_layer=norm_layer)
-        se_layers = [2, 4, 6, 9]
-        for idx in se_layers:
+        backbone = mobilenet_v3_large(norm_layer=norm_layer, num_classes=num_classes)
+        attention_layers = [2, 4, 6, 9]
+        for idx in attention_layers:
             layer = backbone.features[idx]
             if isinstance(layer, nn.Sequential) and hasattr(layer[0], 'out_channels'):
                 out_ch = layer[0].out_channels
@@ -73,6 +73,6 @@ def fasterrcnn_mobilenet_v3_large_fpn_attention(num_classes, attention_type = 's
                 continue  # skip if not a conv layer
             backbone.features[idx] = nn.Sequential(layer, attention_block(attention_type, out_ch))
         backbone = _mobilenet_extractor(backbone, True, trainable_backbone_layers)
-        model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=2, weights_backbone=None)
+        model = fasterrcnn_mobilenet_v3_large_fpn(weights=None, num_classes=num_classes, weights_backbone=None)
         model.backbone = backbone
         return model
