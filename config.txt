@@ -16,7 +16,8 @@ batch_size=12
 num_workers=6
 
 attention=True
-attention_type=cbam
+#attention_backbone_type=se
+attention_head_type=se
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
 model=ssd

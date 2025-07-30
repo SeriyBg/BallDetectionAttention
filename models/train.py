@@ -61,7 +61,7 @@ def train(params: Params):
         scheduler.step()
 
     model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
-    with open('training_stats_{}.pickle'.format(model_name), 'wb') as handle:
+    with open('{}/training_stats_{}.pickle'.format(MODEL_FOLDER, model_name), 'wb') as handle:
         pickle.dump(training_stats, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
@@ -71,7 +71,7 @@ def train(params: Params):
 def model_factory(params: Params):
     model = None
     if params.model == 'ssd':
-        model = ssd_ball_detector(params.attention, params.attention_type)
+        model = ssd_ball_detector(params.attention, params.attention_backbone_type, params.attention_head_type)
     elif params.model == 'fasterrcnn':
         model = fasterrccn(params)
     elif params.model == 'fasterrcnn_mobilenet':

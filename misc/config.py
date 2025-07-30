@@ -34,7 +34,8 @@ class Params:
         self.model = params.get('model', 'ssd')
         self.model_name = 'model_{}_{}'.format(self.model, get_datetime())
         self.attention = params.getboolean('attention', False)
-        self.attention_type = params.get('attention_type', 'se')
+        self.attention_backbone_type = params.get('attention_backbone_type', None)
+        self.attention_head_type = params.get('attention_head_type', None)
         resize = params.get('transform_resize', None)
         if resize:
             self.transform_resize = literal_eval(resize)
@@ -48,11 +49,9 @@ class Params:
         assert len(self.dfl_paths) > 0, "At least one DFL dataset path must be provided"
         for _, dfl_path in enumerate(self.dfl_paths):
             assert dfl_path is None or os.path.exists(dfl_path), "Cannot access DFL dataset: {}".format(dfl_path)
-        # assert os.path.exists(self.issia_path), "Cannot access ISSIA CNR dataset: {}".format(self.issia_path)
-        # for c in self.issia_train_cameras:
-        #     assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
-        # for c in self.issia_val_cameras:
-        #     assert 1 <= c <= 6, 'ISSIA CNR camera number must be between 1 and 6. Is: {}'.format(c)
+
+        if self.attention:
+            assert self.attention_backbone_type is not None or self.attention_head_type is not None, "Attention backbone type or head type must be provided"
 
     def print(self):
         print('Parameters:')
