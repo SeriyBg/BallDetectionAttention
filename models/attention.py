@@ -37,6 +37,17 @@ class CBAM(nn.Module):
         return x * sa
 
 
+class ApplyAttentionToList(nn.Module):
+    def __init__(self, attention_type, channels_list):
+        super().__init__()
+        self.blocks = nn.ModuleList([
+            attention_block(attention_type, ch) for ch in channels_list
+        ])
+
+    def forward(self, xs):
+        return [att(x) for att, x in zip(self.blocks, xs)]
+
+
 def attention_block(type, channels, reduction=16):
     assert type=='se' or type=='cbam'
     if type=='se':
