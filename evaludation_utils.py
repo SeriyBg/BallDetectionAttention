@@ -41,9 +41,7 @@ if __name__ == '__main__':
     all_preds = []
     all_targets = []
 
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_cbam_6b55691cf643d088acc936b77e66c50694bcb0b2/ssd_20250726_0318_final.pth"
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_cbam_crop_300_150782556f368acd0bc0cd3637411911ab6e5319/ssd_20250728_1407_final.pth"
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/fasterrcnn_attention_pretrained_a92fcacc177473c5b38d7587fd825d1540f5a529/ssd_20250729_1406_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_head_crop_300_94998f749d7ebe7a70028d28d146f201c68527ec/ssd_20250730_1248_final.pth"
     state_dict = torch.load(
         model_path,
         map_location=device)

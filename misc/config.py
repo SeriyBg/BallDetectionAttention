@@ -32,7 +32,6 @@ class Params:
         self.lr = params.getfloat('lr', 1e-3)
 
         self.model = params.get('model', 'ssd')
-        self.model_name = 'model_{}_{}'.format(self.model, get_datetime())
         self.attention = params.getboolean('attention', False)
         self.attention_backbone_type = params.get('attention_backbone_type', None)
         self.attention_head_type = params.get('attention_head_type', None)
@@ -42,6 +41,14 @@ class Params:
         else :
             self.transform_resize = None
         self.transform_crop = params.getint('transform_crop')
+
+        self.model_name = ("_".join(filter(None, [
+            self.model,
+            f"backbone_{self.attention_backbone_type}" if self.attention and self.attention_backbone_type is not None else None,
+            f"head_{self.attention_head_type}" if self.attention and self.attention_head_type is not None else None,
+            "{}"
+        ]))).format(get_datetime())
+        print(self.model_name)
 
         # self._check_params()
 
