@@ -60,11 +60,10 @@ def train(params: Params):
                 print(f"{phase} [SSD] - Loss: {total_loss:.4f}; Loc Loss: {loss_dict['loss_box_reg']:.4f}; Cls Loss: {loss_dict['loss_classifier']:.4f}; RPN cls loss: {loss_dict['loss_objectness']:.4f}, RPN loc loss: {loss_dict['loss_rpn_box_reg']:.4f}")
         scheduler.step()
 
-    model_name = 'ssd_' + time.strftime("%Y%m%d_%H%M")
-    with open('{}/training_stats_{}.pickle'.format(MODEL_FOLDER, model_name), 'wb') as handle:
+    with open('{}/ts_{}.pickle'.format(MODEL_FOLDER, params.model_name), 'wb') as handle:
         pickle.dump(training_stats, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    model_filepath = os.path.join(MODEL_FOLDER, model_name + '_final' + '.pth')
+    model_filepath = os.path.join(MODEL_FOLDER, params.model_name + '_final' + '.pth')
     torch.save(model.state_dict(), model_filepath)
 
 
