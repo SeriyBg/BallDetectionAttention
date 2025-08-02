@@ -12,7 +12,7 @@ class Params:
         config = configparser.ConfigParser()
 
         config.read(self.path)
-        params = config[path]
+        params = config[section]
         self.issia_path = params.get('issia_path', None)
         if self.issia_path is not None:
             temp = params.get('issia_train_cameras', '1, 2, 3, 4')
