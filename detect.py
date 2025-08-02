@@ -1,5 +1,3 @@
-import argparse
-
 import cv2
 import torch
 from torch.utils.data import DataLoader, ConcatDataset
@@ -7,16 +5,11 @@ from torch.utils.data import DataLoader, ConcatDataset
 from data.augmentation import augmentations
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from data.detect_utils import draw_boxes
-from misc.config import Params
 from models.train import model_factory
+from parameter_rader import get_parameters
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='Path to the configuration file', type=str, default='config.txt')
-    args = parser.parse_args()
-
-    print('Config path: {}'.format(args.config))
-    params = Params(args.config)
+    params = get_parameters()
 
     model = model_factory(params)
 

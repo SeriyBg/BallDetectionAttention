@@ -1,16 +1,8 @@
-import argparse
-
-from misc.config import Params
 from models.train import train
+from parameter_rader import get_parameters
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='Path to the configuration file', type=str, default='config.txt')
-    args = parser.parse_args()
-
-    print('Config path: {}'.format(args.config))
-
-    params = Params(args.config)
+    params = get_parameters()
     train(params)
 
 

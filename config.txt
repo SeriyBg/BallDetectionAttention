@@ -5,9 +5,10 @@ issia_train_cameras=1,2,3,4
 issia_val_cameras=5,6
 
 #transform_resize=(720, 1280)
-transform_crop=720
+transform_crop=300
 
-dfl_paths=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5,/Users/sergebishyr/PhD/datasets/Football (Soccer) Ball Detection - DFL
+#dfl_paths=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5,/Users/sergebishyr/PhD/datasets/Football (Soccer) Ball Detection - DFL
+dfl_paths=/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5
 #dfl_paths=/workspace/ball_annotated_3k_yolov5
 
 epochs=10
@@ -15,9 +16,35 @@ lr=1e-4
 batch_size=12
 num_workers=6
 
-attention=True
-#attention_backbone_type=se
-attention_head_type=se
+attention=False
+#se, cbam, csse, ca, eca
+#attention_backbone_type=cbam
+#attention_head_type=se
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
 model=ssd
+
+
+[HEAD_SE]
+attention=True
+attention_head_type=se
+
+[HEAD_CA]
+attention=True
+attention_head_type=ca
+
+[HEAD_ECA]
+attention=True
+attention_head_type=eca
+
+[BACK_SE]
+attention=True
+attention_backbone_type=se
+
+[BACK_CA]
+attention=True
+attention_backbone_type=ca
+
+[BACK_ECA]
+attention=True
+attention_backbone_type=eca

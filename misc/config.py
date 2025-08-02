@@ -5,14 +5,14 @@ from ast import literal_eval
 
 
 class Params:
-    def __init__(self, path):
+    def __init__(self, path, section='DEFAULT'):
         assert os.path.exists(path), 'Cannot find configuration file: {}'.format(path)
         self.path = path
 
         config = configparser.ConfigParser()
 
         config.read(self.path)
-        params = config['DEFAULT']
+        params = config[path]
         self.issia_path = params.get('issia_path', None)
         if self.issia_path is not None:
             temp = params.get('issia_train_cameras', '1, 2, 3, 4')
