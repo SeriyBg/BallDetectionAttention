@@ -34,7 +34,7 @@ if __name__ == '__main__':
     all_preds = []
     all_targets = []
 
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_head_crop_300_94998f749d7ebe7a70028d28d146f201c68527ec/ssd_20250730_1248_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_head_se_20250802_1147_final.pth"
     state_dict = torch.load(
         model_path,
         map_location=device)
