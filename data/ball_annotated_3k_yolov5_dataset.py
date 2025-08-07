@@ -1,12 +1,13 @@
 import os
 
 import torch
+import yaml
 from torch.utils.data import Dataset
 from PIL import Image
 
 
 class BallAnnotated3kYOLOV5Dataset(Dataset):
-    def __init__(self, root, transform, mode, num_workers=1):
+    def __init__(self, root, transform, mode, num_workers=1, ball_labels=None):
         self.root = root
         self.mode = mode
         self.transform = transform
@@ -14,6 +15,15 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
         self.labels_dir = os.path.join(root, mode, 'labels')
         self.image_list = [f for f in os.listdir(self.images_dir) if f.endswith(".jpg")]
         self.num_workers =num_workers
+        if ball_labels is None:
+            self.ball_labels = []
+        else:
+            with open(root + '/data.yaml', 'r') as file:
+                yaml_data = yaml.safe_load(file)
+            # Access the specific key
+            all_labels = yaml_data['names']
+            self.ball_labels = [i for i, x in enumerate(all_labels) if x in ball_labels]
+
 
     def __len__(self):
         return len(self.image_list)
@@ -36,7 +46,7 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
                     parts = line.split()
                     if len(parts) != 5:
                         continue
-                    _, xc, yc, w, h = map(float, parts)
+                    l, xc, yc, w, h = map(float, parts)
 
                     # Convert YOLO (normalized) to pixel (xmin, ymin, xmax, ymax)
                     xc *= width
@@ -49,8 +59,12 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
                     x2 = xc + w / 2
                     y2 = yc + h / 2
 
-                    boxes.append([x1, y1, x2, y2])
-                    labels.append(1)  # 1 = ball
+                    if self.ball_labels is None:
+                        boxes.append([x1, y1, x2, y2])
+                        labels.append(1)  # 1 = ball
+                    elif l in self.ball_labels:
+                        boxes.append([x1, y1, x2, y2])
+                        labels.append(1)  # 1 = ball
 
         if boxes:
             target = {

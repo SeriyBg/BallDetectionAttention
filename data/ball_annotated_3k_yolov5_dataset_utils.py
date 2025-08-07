@@ -2,7 +2,7 @@ import cv2
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms.v2 import Compose
 
-from data.augmentation import BallCropTransform, ToTensor, augmentations
+from data.augmentation import BallCropTransform, ToTensor, augmentations, BallColorJitter
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from misc.config import Params
 
@@ -17,12 +17,14 @@ def make_dfl_dataloaders(params: Params):
             transform=augmentations(params),
             mode="train",
             num_workers=params.num_workers,
+            ball_labels=params.ball_labels,
         ))
         dfl_val.append(BallAnnotated3kYOLOV5Dataset(
             root=dfl_path,
             transform=augmentations(params),
             mode="valid",
             num_workers=params.num_workers,
+            ball_labels=params.ball_labels,
         ))
     train_dataset = ConcatDataset(dfl_train) if len(dfl_train) > 1 else dfl_train[0]
     val_dataset = ConcatDataset(dfl_val) if len(dfl_val) > 1 else dfl_val[0]
@@ -36,12 +38,15 @@ def make_dfl_dataloaders(params: Params):
 if __name__ == '__main__':
     # Base dataset (no transform — we'll operate on raw image for visualization)
     dataset = BallAnnotated3kYOLOV5Dataset(
-        root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
+        # root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
+        root="/Users/sergebishyr/PhD/datasets/Detect Players.v7i.yolov5pytorch",
         transform=Compose([
-            BallCropTransform(720),
+            BallCropTransform(300),
+            BallColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
             ToTensor(),
         ]),
-        mode="train"
+        mode="train",
+        ball_labels=["Ball"]
     )
 
     for idx in range(len(dataset)):

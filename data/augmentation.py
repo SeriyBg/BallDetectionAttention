@@ -120,6 +120,14 @@ class ColorJitter(object):
         image, boxes, labels = sample
         return self.image_transform(image), boxes, labels
 
+class BallColorJitter(object):
+    def __init__(self, brightness=0., contrast=0., saturation=0., hue=0.):
+        self.image_transform = transforms.ColorJitter(brightness, contrast, saturation, hue)
+
+    def __call__(self, sample):
+        image, target = sample
+        return self.image_transform(image), target
+
 
 class RandomHorizontalFlip(object):
     def __init__(self, p=0.5):

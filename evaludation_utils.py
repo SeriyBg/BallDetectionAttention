@@ -23,6 +23,7 @@ if __name__ == '__main__':
             transform=augmentations(params),
             mode="test",
             num_workers=params.num_workers,
+            ball_labels=params.ball_labels,
         ))
     ds = ConcatDataset(dfl_test) if len(dfl_test) > 1 else dfl_test[0]
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     all_preds = []
     all_targets = []
 
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_head_se_20250802_1147_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_20250802_0816_final.pth"
     state_dict = torch.load(
         model_path,
         map_location=device)

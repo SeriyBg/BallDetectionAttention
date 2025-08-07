@@ -16,7 +16,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    model_path = "/Users/sergebishyr/PhD/models/ball_detection/ssd_attention_cbam_crop_300_150782556f368acd0bc0cd3637411911ab6e5319/ssd_20250728_1407_final.pth"
+    model_path = "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_backbone_ca_head_eca_20250804_1246_final.pth"
     state_dict = torch.load(model_path,
                             map_location=device)
     model.load_state_dict(state_dict)
@@ -31,6 +31,7 @@ if __name__ == '__main__':
             transform=augmentations(params),
             mode="test",
             num_workers=params.num_workers,
+            ball_labels=params.ball_labels,
         ))
     ds = ConcatDataset(dfl_test) if len(dfl_test) > 1 else dfl_test[0]
     dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,

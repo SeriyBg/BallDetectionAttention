@@ -22,6 +22,9 @@ if __name__ == '__main__':
         {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_head_ca_20250802_1522_final.pth", "section" : "HEAD_CA"},
         {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_head_eca_20250802_1859_final.pth", "section" : "HEAD_ECA"},
         {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_head_se_20250802_1147_final.pth", "section" : "HEAD_SE"},
+        {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_backbone_ca_head_ca_20250804_0718_final.pth", "section" : "BACK_CA_HEAD_CA"},
+        {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_backbone_ca_head_eca_20250804_1246_final.pth", "section" : "BACK_CA_HEAD_ECA"},
+        {"path": "/Users/sergebishyr/PhD/models/ball_detection/100e/ssd_backbone_ca_head_se_20250804_1808_final.pth", "section" : "BACK_CA_HEAD_SE"},
     ]
 
     print('Config path: {}'.format(args.config))
@@ -39,6 +42,7 @@ if __name__ == '__main__':
                 transform=augmentations(params),
                 mode="test",
                 num_workers=params.num_workers,
+                ball_labels=params.ball_labels,
             ))
         ds = ConcatDataset(dfl_test) if len(dfl_test) > 1 else dfl_test[0]
         dl = DataLoader(ds, batch_size=params.batch_size, shuffle=True,
