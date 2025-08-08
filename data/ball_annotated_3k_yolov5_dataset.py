@@ -59,7 +59,7 @@ class BallAnnotated3kYOLOV5Dataset(Dataset):
                     x2 = xc + w / 2
                     y2 = yc + h / 2
 
-                    if self.ball_labels is None:
+                    if len(self.ball_labels)==0:
                         boxes.append([x1, y1, x2, y2])
                         labels.append(1)  # 1 = ball
                     elif l in self.ball_labels:
