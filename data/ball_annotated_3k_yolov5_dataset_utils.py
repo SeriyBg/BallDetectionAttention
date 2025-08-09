@@ -50,7 +50,7 @@ if __name__ == '__main__':
     )
 
     for idx in range(len(dataset)):
-        image_tensor, target = dataset[0]  # image_tensor: (C, H, W)
+        image_tensor, target = dataset[idx]  # image_tensor: (C, H, W)
         image_np = image_tensor.permute(1, 2, 0).numpy()  # (H, W, C), float [0,1]
         image_bgr = (image_np * 255).astype("uint8")
         image_bgr = cv2.cvtColor(image_bgr, cv2.COLOR_RGB2BGR)
