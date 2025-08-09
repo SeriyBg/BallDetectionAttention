@@ -475,5 +475,6 @@ def augmentations(params: Params):
     if params.transform_crop:
         transform_list.append(BallCropTransform(params.transform_crop))
 
+    transform_list.append(BallColorJitter())
     transform_list.append(ToTensorAndNormalize())
     return transforms.Compose(transform_list)
