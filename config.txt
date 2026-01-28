@@ -21,34 +21,10 @@ attention=False
 #se, cbam, csse, ca, eca
 #attention_backbone_type=cbam
 #attention_head_type=se
+#attention_transition_type=se
 
 #ssd, fasterrcnn, fasterrcnn_mobilenet
 model=ssd
-
-
-[HEAD_SE]
-attention=True
-attention_head_type=se
-
-[HEAD_CA]
-attention=True
-attention_head_type=ca
-
-[HEAD_ECA]
-attention=True
-attention_head_type=eca
-
-[BACK_SE]
-attention=True
-attention_backbone_type=se
-
-[BACK_CA]
-attention=True
-attention_backbone_type=ca
-
-[BACK_ECA]
-attention=True
-attention_backbone_type=eca
 
 [BACK_CA_HEAD_CA]
 attention=True
@@ -64,3 +40,48 @@ attention_head_type=eca
 attention=True
 attention_backbone_type=ca
 attention_head_type=se
+
+; =========================
+; HEAD-ONLY (pre-head gating)
+; =========================
+[HEAD_SE]
+attention=True
+attention_head_type=se
+
+[HEAD_CA]
+attention=True
+attention_head_type=ca
+
+[HEAD_ECA]
+attention=True
+attention_head_type=eca
+
+; =========================
+; BACKBONE-ONLY (conv3_3 + conv4_3 taps)
+; =========================
+[BACK_SE]
+attention=True
+attention_backbone_type=se
+
+[BACK_CA]
+attention=True
+attention_backbone_type=ca
+
+[BACK_ECA]
+attention=True
+attention_backbone_type=eca
+
+; =========================
+; TRANSITION-ONLY (after conv7)
+; =========================
+[TRANSITION_SE]
+attention=True
+attention_transition_type=se
+
+[TRANSITION_CA]
+attention=True
+attention_transition_type=ca
+
+[TRANSITION_ECA]
+attention=True
+attention_transition_type=eca

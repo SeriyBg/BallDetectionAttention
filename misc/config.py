@@ -35,6 +35,7 @@ class Params:
         self.attention = params.getboolean('attention', False)
         self.attention_backbone_type = params.get('attention_backbone_type', None)
         self.attention_head_type = params.get('attention_head_type', None)
+        self.attention_transition_type = params.get('attention_transition_type', None)
         self.ball_labels = params.get('ball_labels', None)
 
         resize = params.get('transform_resize', None)

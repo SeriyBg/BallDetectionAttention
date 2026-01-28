@@ -2,7 +2,7 @@ import cv2
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms.v2 import Compose
 
-from data.augmentation import BallCropTransform, ToTensor, augmentations, BallColorJitter
+from data.augmentation import BallCropTransform, ToTensor, augmentations, BallColorJitter, RandomAffine
 from data.ball_annotated_3k_yolov5_dataset import BallAnnotated3kYOLOV5Dataset
 from misc.config import Params
 
@@ -41,6 +41,7 @@ if __name__ == '__main__':
         # root="/Users/sergebishyr/PhD/datasets/ball_annotated_3k_yolov5",
         root="/Users/sergebishyr/PhD/datasets/Detect Players.v7i.yolov5pytorch",
         transform=Compose([
+            RandomAffine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.8, 1.2), shear=(-5, 5)),
             BallCropTransform(300),
             BallColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
             ToTensor(),

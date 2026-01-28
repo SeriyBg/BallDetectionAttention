@@ -237,13 +237,13 @@ class RandomAffine:
         return angle, translations, scale, shear
 
     def __call__(self, sample):
-        image, boxes, labels = sample
+        image, target = sample
         height = image.height
         width = image.width
         angle, translate, scale, shear = self.get_params(height, width)
 
         center = (width * 0.5 + 0.5, height * 0.5 + 0.5)
-        coeffs = F._get_inverse_affine_matrix(center, angle, translate, scale, shear)
+        coeffs = F._geometry._get_inverse_affine_matrix(center, angle, translate, scale, shear)
         inverse_affine_matrix = np.eye(3)
         inverse_affine_matrix[:2] = np.array(coeffs).reshape(2,
                                                              3)  # Fill-in first 2 rows of an affine transformation matrix
@@ -261,9 +261,11 @@ class RandomAffine:
 
         # Compute affine transform matrix and apply it to keypoints
         affine_matrix = np.linalg.pinv(inverse_affine_matrix)
-        boxes, labels = apply_transform_and_clip(boxes, labels, affine_matrix, (width, height))
+        boxes, labels = apply_transform_and_clip(target["boxes"], target["labels"], affine_matrix, (width, height))
+        target["boxes"] = boxes
+        target["labels"] = labels
 
-        return image, boxes, labels
+        return image, target
 
 
 class RandomCrop:
