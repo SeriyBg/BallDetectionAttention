@@ -49,6 +49,7 @@ class Params:
             self.model,
             f"backbone_{self.attention_backbone_type}" if self.attention and self.attention_backbone_type is not None else None,
             f"head_{self.attention_head_type}" if self.attention and self.attention_head_type is not None else None,
+            f"transition_{self.attention_transition_type}" if self.attention and self.attention_transition_type is not None else None,
             "{}"
         ]))).format(get_datetime())
         print(self.model_name)
